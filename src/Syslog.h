@@ -1,11 +1,17 @@
 #ifndef SYSLOG_H
-#define SYSLOG_H 
+#define SYSLOG_H
 
 #include <stdarg.h>
 #include <inttypes.h>
 #include <WString.h>
 #include <IPAddress.h>
 #include <Udp.h>
+
+#if !defined(ESP8266)
+  #error "The library relies on SPIFFS now and it's hard to support multiple platforms. Supported platform is ESP8266 only."
+#endif
+
+#include "FS.h"
 
 // undefine ugly logf macro from avr's math.h
 // this fix compilation errors on AtmelAVR platforms
@@ -98,6 +104,8 @@ class Syslog {
 
     String _getPriorityString(uint16_t pri);
 
+    String buildMessage(uint16_t pri, const char *message);
+
   public:
     Syslog(UDP &client, uint8_t protocol = SYSLOG_PROTO_IETF);
     Syslog(UDP &client, const char* server, uint16_t port, const char* deviceHostname = SYSLOG_NILVALUE, const char* appName = SYSLOG_NILVALUE, uint16_t priDefault = LOG_KERN, uint8_t protocol = SYSLOG_PROTO_IETF);
@@ -108,7 +116,7 @@ class Syslog {
     Syslog &deviceHostname(const char* deviceHostname);
     Syslog &appName(const char* appName);
     Syslog &defaultPriority(uint16_t pri = LOG_KERN);
-    
+
 
     Syslog &logMask(uint8_t priMask);
 
@@ -118,7 +126,7 @@ class Syslog {
 
     bool vlogf(uint16_t pri, const char *fmt, va_list args) __attribute__((format(printf, 3, 0)));
     bool vlogf_P(uint16_t pri, PGM_P fmt_P, va_list args) __attribute__((format(printf, 3, 0)));
-    
+
     bool logf(uint16_t pri, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
     bool logf(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
 

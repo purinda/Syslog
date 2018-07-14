@@ -211,39 +211,82 @@ inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
   // Set default facility if none specified.
   if ((pri & LOG_FACMASK) == 0)
     pri = LOG_MAKEPRI(LOG_FAC(this->_priDefault), pri);
+
+  File f = SPIFFS.open("/f.txt", "a+");
+  if (!f) {
+      Serial.println("file open failed");
+  } else {
+    // now write two lines in key/value style with  end-of-line characters
+    f.println(buildMessage(pri, message));
+  }
+  f.close();
+
   if (this->_server != NULL) {
     result = this->_client->beginPacket(this->_server, this->_port);
   } else {
     result = this->_client->beginPacket(this->_ip, this->_port);
   }
-  if (result != 1)
-    return false;
+  if (result != 1) {
+      return true;
+  } else {
 
-  // IETF Doc: https://tools.ietf.org/html/rfc5424
-  // BSD Doc: https://tools.ietf.org/html/rfc3164
-  this->_client->print('<');
-  this->_client->print(pri);
-  if (this->_protocol == SYSLOG_PROTO_IETF) {
-    this->_client->print(F(">1 - "));
-  } else {
-    this->_client->print(F(">"));
+    this->_client->endPacket();
+
+    File f = SPIFFS.open("/f.txt", "r");
+
+    // we could open the file
+   while(f.available()) {
+     if (this->_server != NULL) {
+       result = this->_client->beginPacket(this->_server, this->_port);
+     } else {
+       result = this->_client->beginPacket(this->_ip, this->_port);
+     }
+
+     //Lets read line by line from the file
+     String line = f.readStringUntil('\n');
+     //Serial.println(String("* SYSLOG: ") + line);
+
+     const char *p;
+     p = line.c_str();
+     while (*p) {
+         this->_client->write(*p);
+         p++;
+     }
+
+     this->_client->endPacket();
+   }
+
+    SPIFFS.remove("/f.txt");
+
   }
-  this->_client->print(this->_deviceHostname);
-  this->_client->print(' ');
-  this->_client->print(this->_appName);
-  if (this->_protocol == SYSLOG_PROTO_IETF) {
-    this->_client->print(F(" - - - \xEF\xBB\xBF"));
-  } else {
-    this->_client->print(F("[0]: "));
-  }
-  this->_client->print(message);
-  this->_client->endPacket();
 
   return true;
 }
 
 inline bool Syslog::_sendLog(uint16_t pri, const __FlashStringHelper *message) {
   return this->_sendLog(pri, String(message).c_str());
+}
+
+String Syslog::buildMessage(uint16_t pri, const char *message) {
+  // IETF Doc: https://tools.ietf.org/html/rfc5424
+  // BSD Doc: https://tools.ietf.org/html/rfc3164
+  String write = String("<");
+  write += String(pri);
+  if (this->_protocol == SYSLOG_PROTO_IETF) {
+    write += String(F(">1 - "));
+  } else {
+    write += String(F(">"));
+  }
+  write += String(this->_deviceHostname);
+  write += String(" ");
+  write += String(this->_appName);
+  if (this->_protocol == SYSLOG_PROTO_IETF) {
+    write += String(F(" - - - \xEF\xBB\xBF"));
+  } else {
+    write += String(F("[0]: "));
+  }
+  write += String(message);
+  return write;
 }
 
 String Syslog::_getPriorityString(uint16_t pri) {
