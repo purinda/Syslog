@@ -216,8 +216,10 @@ inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
   if (!f) {
       Serial.println("file open failed");
   } else {
-    // now write two lines in key/value style with  end-of-line characters
-    f.println(buildMessage(pri, message));
+    String syslogLine = buildMessage(pri, message);
+    syslogLine.replace("\r","");
+    syslogLine.replace("\n","");
+    f.println(syslogLine);
   }
   f.close();
 
@@ -244,6 +246,7 @@ inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
 
      //Lets read line by line from the file
      String line = f.readStringUntil('\n');
+     line.replace("\r","");
      //Serial.println(String("* SYSLOG: ") + line);
 
      const char *p;
