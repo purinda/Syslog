@@ -199,7 +199,7 @@ inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
   {
      Serial.printf("%s: %s\r\n", this->_getPriorityString(pri).c_str(), message);
   }
-  
+
   if ((this->_server == NULL && this->_ip == INADDR_NONE) || this->_port == 0)
   {
      return false;
@@ -243,55 +243,7 @@ inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
 }
 
 inline bool Syslog::_sendLog(uint16_t pri, const __FlashStringHelper *message) {
-  int result;
-
-  if (this->_serialPrint && Serial)
-  {
-     Serial.printf("%s: %s\r\n", this->_getPriorityString(pri).c_str(), String(message).c_str());
-  }
-
-  if ((this->_server == NULL && this->_ip == INADDR_NONE) || this->_port == 0)
-    return false;
-
-  // Check priority against priMask values.
-  if ((LOG_MASK(LOG_PRI(pri)) & this->_priMask) == 0)
-    return true;
-
-  // Set default facility if none specified.
-  if ((pri & LOG_FACMASK) == 0)
-    pri = LOG_MAKEPRI(LOG_FAC(this->_priDefault), pri);
-
-  if (this->_server != NULL) {
-    result = this->_client->beginPacket(this->_server, this->_port);
-  } else {
-    result = this->_client->beginPacket(this->_ip, this->_port);
-  }
-
-  if (result != 1)
-    return false;
-
-  // IETF Doc: https://tools.ietf.org/html/rfc5424
-  // BSD Doc: https://tools.ietf.org/html/rfc3164
-  this->_client->print('<');
-  this->_client->print(pri);
-  if (this->_protocol == SYSLOG_PROTO_IETF) {
-    this->_client->print(F(">1 - "));
-  } else {
-    this->_client->print(F(">"));
-  }
-  this->_client->print(this->_deviceHostname);
-  this->_client->print(' ');
-  this->_client->print(this->_appName);
-  if (this->_protocol == SYSLOG_PROTO_IETF) {
-    this->_client->print(F(" - - - \xEF\xBB\xBF"));
-  } else {
-    this->_client->print(F("[0]: "));
-  }
-  this->_client->print(message);
-  this->_client->endPacket();
-
-
-  return true;
+  return this->_sendLog(pri, String(message).c_str());
 }
 
 String Syslog::_getPriorityString(uint16_t pri) {
