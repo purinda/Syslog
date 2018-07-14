@@ -247,7 +247,7 @@ inline bool Syslog::_sendLog(uint16_t pri, const __FlashStringHelper *message) {
 
   if (this->_serialPrint)
   {
-     Serial.printf("%s: %s\r\n", this->_getPriorityString(pri).c_str(), message);
+     Serial.printf("%s: %s\r\n", this->_getPriorityString(pri).c_str(), String(message).c_str());
   }
 
   if ((this->_server == NULL && this->_ip == INADDR_NONE) || this->_port == 0)
