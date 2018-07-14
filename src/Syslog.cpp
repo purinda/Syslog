@@ -194,8 +194,8 @@ void Syslog::setSerialPrint(bool serialPrint) {
 
 inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
    int result;
-  
-  if (this->_serialPrint)
+
+  if (this->_serialPrint && Serial)
   {
      Serial.printf("%s: %s\r\n", this->_getPriorityString(pri).c_str(), message);
   }
@@ -245,7 +245,7 @@ inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
 inline bool Syslog::_sendLog(uint16_t pri, const __FlashStringHelper *message) {
   int result;
 
-  if (this->_serialPrint)
+  if (this->_serialPrint && Serial)
   {
      Serial.printf("%s: %s\r\n", this->_getPriorityString(pri).c_str(), String(message).c_str());
   }
