@@ -6,6 +6,8 @@
 #include <WString.h>
 #include <IPAddress.h>
 #include <Udp.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 
 #if !defined(ESP8266)
   #error "The library relies on SPIFFS now and it's hard to support multiple platforms. Supported platform is ESP8266 only."

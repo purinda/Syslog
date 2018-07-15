@@ -24,6 +24,9 @@ So in the code set
 #define SYSLOG_SERVER "example.com"
 #define SYSLOG_PORT 65501
 ```
+To check if there is a internet connection the syslog server is connected on port 80. Or if no server-url (but IP) provided google.com is used.
+It checks connection status for each message currently.
+
 ## Features
  - Supports original Syslog severity level and facility constants
  - Supports both Syslog messge formats: [IETF (RFC 5424)] and [BSD (RFC 3164)]

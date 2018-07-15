@@ -223,6 +223,15 @@ inline bool Syslog::_sendLog(uint16_t pri, const char *message) {
   }
   f.close();
 
+    HTTPClient client;
+    result = client.begin(this->_server != NULL ? this->_server : "google.com", 80);
+
+    int httpCode = client.GET();
+    if (HTTP_CODE_OK != httpCode &&
+       HTTP_CODE_MOVED_PERMANENTLY != httpCode) {
+      return true;
+    }
+
   if (this->_server != NULL) {
     result = this->_client->beginPacket(this->_server, this->_port);
   } else {
