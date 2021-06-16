@@ -37,45 +37,48 @@ WiFiUDP udpClient;
 Syslog syslog(udpClient, SYSLOG_SERVER, SYSLOG_PORT, DEVICE_HOSTNAME, APP_NAME, LOG_KERN);
 int iteration = 1;
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
-  Serial.println();
+void setup()
+{
+    Serial.begin(115200);
+    Serial.println();
+    Serial.println();
 
-  // We start by connecting to a WiFi network
-  Serial.print("Connecting to ");
-  Serial.println(WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+    // We start by connecting to a WiFi network
+    Serial.print("Connecting to ");
+    Serial.println(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
 
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
 }
 
-void loop() {
-  // Severity levels can be found in Syslog.h. They are same like in Linux 
-  // syslog.
-  syslog.log(LOG_INFO, "Begin loop");
+void loop()
+{
+    // Severity levels can be found in Syslog.h. They are same like in Linux
+    // syslog.
+    syslog.log(LOG_INFO, "Begin loop");
 
-  // Log message can be formated like with printf function.
-  syslog.logf(LOG_ERR,  "This is error message no. %d", iteration);
-  syslog.logf(LOG_INFO, "This is info message no. %d", iteration);
+    // Log message can be formated like with printf function.
+    syslog.logf(LOG_ERR, "This is error message no. %d", iteration);
+    syslog.logf(LOG_INFO, "This is info message no. %d", iteration);
 
-  // You can force set facility in pri parameter for this log message. More 
-  // facilities in syslog.h or in Linux syslog documentation.
-  syslog.logf(LOG_DAEMON | LOG_INFO, "This is daemon info message no. %d", 
-    iteration);
+    // You can force set facility in pri parameter for this log message. More
+    // facilities in syslog.h or in Linux syslog documentation.
+    syslog.logf(LOG_DAEMON | LOG_INFO, "This is daemon info message no. %d",
+                iteration);
 
-  // F() macro is supported too
-  syslog.log(LOG_INFO, F("End loop"));
-  iteration++;
-  
-  // wait ten seconds before sending log message again
-  delay(10000);
+    // F() macro is supported too
+    syslog.log(LOG_INFO, F("End loop"));
+    iteration++;
+
+    // wait ten seconds before sending log message again
+    delay(10000);
 }

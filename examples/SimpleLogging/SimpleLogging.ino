@@ -17,7 +17,7 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
-#include <Syslog.h>
+#include <syslog.h>
 
 // Syslog server connection info
 #define SYSLOG_SERVER "syslog-server"
@@ -30,8 +30,7 @@
 // Enter a MAC address for your controller below.
 // Newer Ethernet shields have a MAC address printed on a sticker on the shield
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
-};
+	0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 
 // A UDP instance to let us send and receive packets over UDP
 EthernetUDP udpClient;
@@ -41,40 +40,44 @@ Syslog syslog(udpClient, SYSLOG_SERVER, SYSLOG_PORT, DEVICE_HOSTNAME, APP_NAME, 
 
 int iteration = 1;
 
-void setup() {
-  // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+void setup()
+{
+	// Open serial communications and wait for port to open:
+	Serial.begin(9600);
+	while (!Serial)
+	{
+		; // wait for serial port to connect. Needed for native USB port only
+	}
 
-  // start Ethernet
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println("Failed to configure Ethernet using DHCP");
-    // no point in carrying on, so do nothing forevermore:
-    for (;;)
-      ;
-  } 
+	// start Ethernet
+	if (Ethernet.begin(mac) == 0)
+	{
+		Serial.println("Failed to configure Ethernet using DHCP");
+		// no point in carrying on, so do nothing forevermore:
+		for (;;)
+			;
+	}
 }
 
-void loop() {
-  // Severity levels can be found in Syslog.h. They are same like in Linux 
-  // syslog.
-  syslog.log(LOG_INFO, "Begin loop");
+void loop()
+{
+	// Severity levels can be found in Syslog.h. They are same like in Linux
+	// syslog.
+	syslog.log(LOG_INFO, "Begin loop");
 
-  // Log message can be formated like with printf function.
-  syslog.logf(LOG_ERR,  "This is error message no. %d", iteration);
-  syslog.logf(LOG_INFO, "This is info message no. %d", iteration);
+	// Log message can be formated like with printf function.
+	syslog.logf(LOG_ERR, "This is error message no. %d", iteration);
+	syslog.logf(LOG_INFO, "This is info message no. %d", iteration);
 
-  // You can force set facility in pri parameter for this log message. More 
-  // facilities in syslog.h or in Linux syslog documentation.
-  syslog.logf(LOG_DAEMON | LOG_INFO, "This is daemon info message no. %d", 
-    iteration);
+	// You can force set facility in pri parameter for this log message. More
+	// facilities in syslog.h or in Linux syslog documentation.
+	syslog.logf(LOG_DAEMON | LOG_INFO, "This is daemon info message no. %d",
+				iteration);
 
-  // F() macro is supported too
-  syslog.log(LOG_INFO, F("End loop"));
-  iteration++;
-  
-  // wait ten seconds before sending log message again
-  delay(10000);
+	// F() macro is supported too
+	syslog.log(LOG_INFO, F("End loop"));
+	iteration++;
+
+	// wait ten seconds before sending log message again
+	delay(10000);
 }

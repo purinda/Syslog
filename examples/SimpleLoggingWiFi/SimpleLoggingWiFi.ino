@@ -41,75 +41,83 @@ Syslog syslog(udpClient, SYSLOG_SERVER, SYSLOG_PORT, DEVICE_HOSTNAME, APP_NAME, 
 
 int iteration = 1;
 
-void setup() {
-  // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+void setup()
+{
+    // Open serial communications and wait for port to open:
+    Serial.begin(9600);
+    while (!Serial)
+    {
+        ; // wait for serial port to connect. Needed for native USB port only
+    }
 
-  // check for the presence of the shield:
-  if (WiFi.status() == WL_NO_SHIELD) {
-    Serial.println("WiFi shield not present");
-    // don't continue:
-    while (true);
-  }
+    // check for the presence of the shield:
+    if (WiFi.status() == WL_NO_SHIELD)
+    {
+        Serial.println("WiFi shield not present");
+        // don't continue:
+        while (true)
+            ;
+    }
 
-  String fv = WiFi.firmwareVersion();
-  if (fv != "1.1.0") {
-    Serial.println("Please upgrade the firmware");
-  }
+    String fv = WiFi.firmwareVersion();
+    if (fv != "1.1.0")
+    {
+        Serial.println("Please upgrade the firmware");
+    }
 
-  // attempt to connect to Wifi network:
-  while (status != WL_CONNECTED) {
-    Serial.print("Attempting to connect to SSID: ");
-    Serial.println(WIFI_SSID);
-    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-    status = WiFi.begin(WIFI_SSID, WIFI_PASS);
+    // attempt to connect to Wifi network:
+    while (status != WL_CONNECTED)
+    {
+        Serial.print("Attempting to connect to SSID: ");
+        Serial.println(WIFI_SSID);
+        // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+        status = WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-    // wait 10 seconds for connection:
+        // wait 10 seconds for connection:
+        delay(10000);
+    }
+
+    Serial.println("Connected to wifi");
+    printWifiStatus();
+}
+
+void loop()
+{
+    // Severity levels can be found in Syslog.h. They are same like in Linux
+    // syslog.
+    syslog.log(LOG_INFO, "Begin loop");
+
+    // Log message can be formated like with printf function.
+    syslog.logf(LOG_ERR, "This is error message no. %d", iteration);
+    syslog.logf(LOG_INFO, "This is info message no. %d", iteration);
+
+    // You can force set facility in pri parameter for this log message. More
+    // facilities in syslog.h or in Linux syslog documentation.
+    syslog.logf(LOG_DAEMON | LOG_INFO, "This is daemon info message no. %d",
+                iteration);
+
+    // F() macro is supported too
+    syslog.log(LOG_INFO, F("End loop"));
+    iteration++;
+
+    // wait ten seconds before sending log message again
     delay(10000);
-  }
-
-  Serial.println("Connected to wifi");
-  printWifiStatus();
 }
 
-void loop() {
-  // Severity levels can be found in Syslog.h. They are same like in Linux 
-  // syslog.
-  syslog.log(LOG_INFO, "Begin loop");
+void printWifiStatus()
+{
+    // print the SSID of the network you're attached to:
+    Serial.print("SSID: ");
+    Serial.println(WiFi.SSID());
 
-  // Log message can be formated like with printf function.
-  syslog.logf(LOG_ERR,  "This is error message no. %d", iteration);
-  syslog.logf(LOG_INFO, "This is info message no. %d", iteration);
+    // print your WiFi shield's IP address:
+    IPAddress ip = WiFi.localIP();
+    Serial.print("IP Address: ");
+    Serial.println(ip);
 
-  // You can force set facility in pri parameter for this log message. More 
-  // facilities in syslog.h or in Linux syslog documentation.
-  syslog.logf(LOG_DAEMON | LOG_INFO, "This is daemon info message no. %d", 
-    iteration);
-
-  // F() macro is supported too
-  syslog.log(LOG_INFO, F("End loop"));
-  iteration++;
-  
-  // wait ten seconds before sending log message again
-  delay(10000);
-}
-
-void printWifiStatus() {
-  // print the SSID of the network you're attached to:
-  Serial.print("SSID: ");
-  Serial.println(WiFi.SSID());
-
-  // print your WiFi shield's IP address:
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
-
-  // print the received signal strength:
-  long rssi = WiFi.RSSI();
-  Serial.print("signal strength (RSSI):");
-  Serial.print(rssi);
-  Serial.println(" dBm");
+    // print the received signal strength:
+    long rssi = WiFi.RSSI();
+    Serial.print("signal strength (RSSI):");
+    Serial.print(rssi);
+    Serial.println(" dBm");
 }
